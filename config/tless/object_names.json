@@ -1,0 +1,12 @@
+{
+  "1":  "lamp_socket_bulb",     "2":  "lamp_socket_threaded",  "3":  "lamp_holder_round",
+  "4":  "lamp_socket_switch",   "5":  "lamp_holder_block",     "6":  "mounting_plate",
+  "7":  "triple_socket_block",  "8":  "socket_block",          "9":  "socket_strip",
+  "10": "square_socket_block",  "11": "framed_lamp_socket",    "12": "bracket_lamp_socket",
+  "13": "lamp_holder_e27",      "14": "lamp_holder_plain",     "15": "lamp_holder_threaded",
+  "16": "lamp_holder_cylinder", "17": "ceiling_rose_base",     "18": "round_socket_base",
+  "19": "triple_terminal_block","20": "plug_adapter",          "21": "cube_socket_adapter",
+  "22": "angled_plug_adapter",  "23": "double_socket_adapter", "24": "cylindrical_connector",
+  "25": "junction_box_small",   "26": "junction_box_lid",      "27": "junction_box_flat",
+  "28": "junction_box_glands",  "29": "junction_box_screws",   "30": "round_junction_box"
+}

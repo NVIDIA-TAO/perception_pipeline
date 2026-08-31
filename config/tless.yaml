@@ -1,0 +1,235 @@
+# Dataset profile for T-LESS (primesense test split, BOP19 subset).
+#
+# T-LESS needs unusually little adaptation for a BOP dataset: it is already in the plain layout,
+# ships `cam_R_w2c`/`cam_t_w2c`, and its scenes are static (measured world-pose drift 0.00 mm),
+# so any two frames form a valid stereo pair. Many BOP datasets ship no extrinsics at all, in
+# which case the depth stage has nothing to rectify against and cannot run. `tools/bop_adapt/adapt.py --config tless` does three things only:
+# re-keys the chosen base frame to im_id 0 (T-LESS numbers frames non-contiguously, and the
+# pipeline scores im_id 0), selects which partner frames to expose, and converts `models_cad`
+# from ASCII PLY, which neither `geometry.read_binary_little_endian_ply` nor FoundationPose reads.
+#
+# PARTNER BASELINE IS THE MAIN TUNABLE HERE, and it is a cliff, not a slope. T-LESS offers ~37
+# horizontally-rectifying partners per frame, so `tools/bop_adapt/adapt.py --baseline-min/-max`
+# decides which the pipeline may choose from. Run 1 exposed [0.10, 0.30] m and 11 of 80 scenes
+# came back with catastrophic depth. Grouping those 80 scenes by the baseline actually chosen:
+#
+#     baseline band     scenes   median obj error   worst      scenes over 20 mm
+#     [0.10, 0.24) m       53          2.78-2.91 mm    5.1 mm        0
+#     [0.24, 0.27) m       17          3.40 mm       666.0 mm        1
+#     [0.27, 0.31) m       10         74.38 mm      2695.8 mm       10  <- all of them
+#
+# Every failure sat above 0.27 m and none below 0.24 m. The adapter ships a STRICTER cap than
+# that evidence requires -- `--baseline-max` defaults to 0.20 m, not 0.24 m -- which is a
+# deliberately conservative reading: 0.20 m sits well inside the band that produced no failure at
+# all, and the cost of being wrong here is a scene with catastrophic depth rather than a scene
+# missing. Base frames are sampled every 5th instead of every 10th to keep the scene count up,
+# since a narrower band leaves more base frames with no partner in it.
+#
+# MEASURED AT THE SHIPPED DEFAULTS, so the numbers below describe what you actually get:
+# 144 of 200 base frames find no horizontally-rectifying partner in [0.10, 0.20] m, leaving
+# 56 adapted scenes from 20 source scenes. Raising --baseline-max to 0.24 admits more partners
+# and more scenes; the table above is the evidence for where the ceiling has to be.
+#
+# Worth separating from the working-volume note below: these are two different mechanisms that
+# both look like "bad depth". The volume governs whether a long-baseline partner is REJECTED at
+# all; the band governs which partners are OFFERED. Setting the volume fixed 3 of 8 scenes in the
+# sweep, and capping the band fixed the remaining tail across all 80.
+#
+# NOTE ON SPLITS: T-LESS has NO `val`. It is a BOP-2019-era dataset whose TEST GT is public, so
+# `test_primesense_bop19` is the split with public annotations and is what is scored here.
+# 20 source scenes x 50 frames; one adapted scene per (scene, base frame).
+
+dataset:
+  name: tless
+  root: ../../bop_adapted
+  glob: "tless"
+  split: test
+  base_camera_id: 0
+  # models/ holds the CAD meshes converted to binary; models_eval/ is BOP's decimated copy that
+  # the pose metrics average over. `GroundTruthRenderer.mesh` hardcodes `models/`.
+  models_subdir: models
+  models_eval_subdir: models_eval
+  collected_depth_root: ../../bop_adapted_depth
+  gt_cache_root: ../gt_cache
+
+output:
+  root: ../output
+  batch_subdir: batch_tless
+
+# SAM3 text prompts, one per object name in dataset_map.json.
+#
+# FITTED -- candidates were scored against GT masks over 40 adapted
+# scenes, SAM3 only, no FoundationPose. Two rounds, 141 candidates. Result: recall 0.971 at
+# precision 0.132.
+#
+# THAT PRECISION IS LOW, AND ON THIS DATASET IT IS EXPECTED RATHER THAN A DEFECT. T-LESS is 30
+# texture-less white electrical parts, many near-identical: four lamp holders that differ only in
+# the shape of a lip, five junction boxes that differ in size. A text prompt cannot separate them,
+# so the prompt that finds object 13 also finds 14, 15 and 16. Selecting on recall is still right
+# -- a miss is unrecoverable, a false positive is the rerank's job, and the rerank discriminates
+# on CAD render agreement, which is exactly the signal a text prompt lacks here. Expect much
+# higher precision on a dataset whose objects are visually distinct.
+#
+# The same bimodality as the other two datasets, and starker: "lamp socket" and "lamp holder"
+# return ZERO proposals for every one of objects 1, 2, 3, 4, 11, 12, 13, 14, 15 and 16 -- while
+# "white socket" and "white cylinder" find them all at full recall. Describing the part's
+# FUNCTION fails; describing its APPEARANCE works.
+#
+#   obj  prompt                  TP  FP   rec      obj  prompt                       TP  FP   rec
+#     1  white socket            34 166  0.944      16  white cylinder                 9  79  1.000
+#     2  white lamp fitting      18  68  0.900      17  round white object             6  73  0.857
+#     3  white lamp part         16  94  1.000      18  round plastic base             6  43  1.000
+#     4  white lamp part         25 118  0.962      19  block with three holes         8  33  1.000
+#     5  white plastic block      7  92  1.000      20  plug adapter                   9  71  1.000
+#     6  white plastic part       4  28  1.000      21  white plug adapter             6  50  1.000
+#     7  triple socket block      9  45  0.900      22  plug adapter                   8  58  0.889
+#     8  white socket block       5  33  1.000      23  double socket adapter         10  51  1.000
+#     9  socket strip             9  58  1.000      24  white cylinder                 8 120  1.000
+#    10  square socket block      6  11  1.000      25  plastic box                    4  12  1.000
+#    11  white socket             7  49  0.875      26  white box with lid             4  19  1.000
+#    12  white socket             6  50  1.000      27  flat white box                 4  15  1.000
+#    13  white cylinder           7  81  1.000      28  white box with cable glands    6  19  1.000
+#    14  white cylinder           7  81  1.000      29  plastic box                    4  12  1.000
+#    15  white cylinder           7  81  1.000      30  round electrical box           6  29  1.000
+#
+# Round 2 rescued the two that round 1 failed: object 15 went 0.143 -> 1.000 recall by borrowing
+# "white cylinder" from its lookalikes 13/14/16, and object 17 went 0.286 -> 0.857 on "round
+# white object" after "ceiling rose", "round plastic disc" and "round white plate" all returned
+# nothing.
+prompts:
+  lamp_socket_bulb: white socket
+  lamp_socket_threaded: white lamp fitting
+  lamp_holder_round: white lamp part
+  lamp_socket_switch: white lamp part
+  lamp_holder_block: white plastic block
+  mounting_plate: white plastic part
+  triple_socket_block: triple socket block
+  socket_block: white socket block
+  socket_strip: socket strip
+  square_socket_block: square socket block
+  framed_lamp_socket: white socket
+  bracket_lamp_socket: white socket
+  lamp_holder_e27: white cylinder
+  lamp_holder_plain: white cylinder
+  lamp_holder_threaded: white cylinder
+  lamp_holder_cylinder: white cylinder
+  ceiling_rose_base: round white object
+  round_socket_base: round plastic base
+  triple_terminal_block: block with three holes
+  plug_adapter: plug adapter
+  cube_socket_adapter: white plug adapter
+  angled_plug_adapter: plug adapter
+  double_socket_adapter: double socket adapter
+  cylindrical_connector: white cylinder
+  junction_box_small: plastic box
+  junction_box_lid: white box with lid
+  junction_box_flat: flat white box
+  junction_box_glands: white box with cable glands
+  junction_box_screws: plastic box
+  round_junction_box: round electrical box
+
+regression:
+  clean_dataset: tless
+  clean_scenes: 8
+  # NULL DELIBERATELY, and this is the honest answer rather than a missing entry. The template
+  # asks for one clean dataset and one hard one; this family adapts to a single dataset, so there
+  # is no second capture to nominate. Naming `tless` here would have declared an occluded gate
+  # that is the same run as the clean one. `--occluded` says so instead of running it twice.
+  occluded_dataset: null
+  occluded_scenes: 8
+
+overrides:
+  depth:
+    # MEASURED. GT object centres span 0.652-0.921 m. Swept over 8 scenes against T-LESS's own
+    # primesense depth, error on GT object pixels only:
+    #     volume          clahe    obj median   obj MAE
+    #     none             3.0/0.0    78.27 mm   100.57 mm
+    #     none             none       28.18 mm    31.88 mm
+    #     [0.55, 1.05]     3.0/0.0     2.91 mm     6.44 mm
+    #     [0.45, 1.20]     none        2.89 mm     6.40 mm   <- chosen (clahe within noise)
+    #     [0.30, 1.50]     3.0/0.0     2.99 mm     7.16 mm
+    #
+    # 2.89 mm is a good result for this stage, and the reason is geometric rather than anything
+    # about the tuning: a 0.11-0.24 m baseline at a 0.76 m working distance gives only 78-115 px
+    # of disparity, comfortably inside the model's 416 px search range, and rectifies at 17-22
+    # degrees. A rig with a wide baseline relative to its working distance rectifies at a much
+    # larger angle, loses most of the frame to the rectified overlap, and does substantially
+    # worse -- which is the single biggest lever on this pipeline's accuracy.
+    #
+    # WHY THE VOLUME STILL MATTERS, THOUGH -- and this is the non-obvious part. No pre-shift is
+    # needed at these disparities, so leaving the volume unset ought to be harmless. It is not:
+    # per-scene, `none` and `[0.55, 1.05]` are IDENTICAL on 5 of 8 scenes and catastrophic on 3:
+    #
+    #     scene 10   none -> partner 1, B=0.291 m, obj median  521.53 mm
+    #                set  -> partner 2, B=0.241 m, obj median    3.51 mm
+    #     scene 30   none -> partner 1, B=0.280 m, obj median   35.96 mm
+    #                set  -> partner 3, B=0.223 m, obj median    3.58 mm
+    #     scene 60   none -> partner 1, B=0.291 m, obj median   55.59 mm
+    #                set  -> partner 2, B=0.211 m, obj median    3.19 mm
+    #
+    # The working volume is ALSO the input to `select_partner_camera`'s feasibility ranking. With
+    # it unset, that ranking is disabled and the selector optimises rectification rotation alone,
+    # cheerfully choosing a baseline whose disparity leaves the model's search range -- which
+    # returns a clamped value that looks plausible and is wrong by centimetres. Set it on any
+    # dataset that offers a CHOICE of partner, not just one that needs a pre-shift.
+    #
+    # [0.45, 1.20] over [0.55, 1.05]: marginally better MAE, and the lower near bound makes the
+    # feasibility test stricter, which is protection against exactly the failure above.
+    min_working_distance_m: 0.45
+    max_working_distance_m: 1.20
+    # Within noise of no preprocessing (6.44 vs 6.40 mm MAE over 8 scenes); kept for consistency
+    # with the other profiles. The bilateral detail boost is neutral here too.
+    #
+    # THE COMMERCIAL DEPTH MODEL, as a TensorRT engine. Commented out because an engine is built
+    # for one GPU architecture, one TensorRT version, one precision and one input shape, and none
+    # of that survives being copied to another machine -- a committed path is wrong for everyone
+    # except whoever committed it. UNCOMMENT AND EDIT the line below, or pass
+    # --foundation-stereo-model per run. Without one, a run stops at launch saying so.
+    #
+    # Build it first, and ASK for the shape rather than choosing one:
+    #   ./.venv/bin/python tools/build_tao_engine.py --onnx <deployable>.onnx \
+    #       --shape-from-scene ../../bop_adapted/tless/test/000000
+    #
+    # Why ask: T-LESS rectifies to a width that is not a multiple of 32, and the runtime RESIZES
+    # to the engine's width rather than padding to it, so the required height follows from the
+    # padded width. Rounding both dimensions independently gives a shape 32 rows short, and every
+    # frame is then silently cropped.
+    #
+    # Path is relative to THIS file, so `../../models/` is the sibling `models/` directory in
+    # README.md's layout. See README.md section 2.4.
+    # engine: ../../models/<the .engine build_tao_engine.py wrote>
+  rerank:
+    # Weights are NOT the shipped defaults. They were fitted by searching the three free weights
+    # plus the fp_score divisor against occlusion-aware GT at mask IoU 0.5, with
+    # `render_mask_iou` pinned at 4.0 as the scale gauge, and validated by holding out whole
+    # SCENES -- 4-fold, fit on the rest, scored on the unseen fold. Holding out proposals rather
+    # than scenes would leak, since proposals from one scene are far from independent.
+    #
+    # Two things the fit says that are worth knowing before editing it:
+    #   * `sam_score` earns a NEGATIVE weight. Once render agreement is known, SAM3's text
+    #     confidence adds nothing about whether a proposal is the right object at the right pose,
+    #     and mildly anti-correlates -- it is most confident on large clean blobs, which is also
+    #     what the wrong-object false positives look like.
+    #   * `render_box_iou` deserves several times the shipped weight of 1.0. Mask IoU saturates
+    #     once a pose is roughly right, while box IoU keeps discriminating past that point.
+    #
+    # `defaults.yaml` is deliberately left alone: a formula fitted here is not evidence about a
+    # capture it was never fitted on, which is the same caution that file already gives about its
+    # own cutoff. The CUTOFF in particular does not transfer -- it was swept for T-LESS on the
+    # finished run, which needs no GPU (`evaluate.py --rerank-cutoff`):
+    #
+    #     cutoff   matched   sel P   sel R      F1   MSSD med   <=5 mm   0.1d
+    #        2.0       659   0.220   0.935   0.356     4.24 mm   0.687  0.989
+    #        4.0       637   0.306   0.904   0.458     4.22 mm   0.689  0.992
+    #        5.0       612   0.433   0.868   0.578     4.17 mm   0.699  0.995
+    #        6.0       586   0.645   0.831   0.726     4.12 mm   0.710  0.998   <- chosen
+    #        7.0       512   0.808   0.726   0.765     4.00 mm   0.717  0.998
+    #
+    # F1 is still climbing at 7.0, so this is not an optimum -- it is a choice. 6.0 keeps 0.831
+    # recall for 0.645 precision; 7.0 buys 0.039 more F1 by giving up ten points of recall, and
+    # recall is the half that cannot be recovered downstream. Pose barely moves across the whole
+    # range (MSSD median 4.24 -> 4.00 mm), which says the rerank is discarding weak DETECTIONS
+    # here rather than bad poses. Read that as a property of this capture, not a general rule:
+    # where depth is poor the two become indistinguishable and the same sweep comes out flat.
+    formula: "-1.93 * sam_score + 4.0 * render_mask_iou + 5.95 * render_box_iou - fp_score / 18.03"
+    cutoff: 6.0

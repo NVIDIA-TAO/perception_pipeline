@@ -1,0 +1,212 @@
+# Algorithm defaults for the perception pipeline.
+#
+# This file is the single source of truth for every tuned constant. Nothing here is
+# dataset-specific -- dataset paths, prompts and object names live in a dataset profile
+# (see example_bop.yaml).
+#
+# Precedence, lowest to highest:
+#   this file  ->  a profile's `overrides:` block  ->  the matching CLI flag
+#
+# The comments below are load-bearing: each explains why a value is what it is. Do not change a
+# number without reading the comment above it, and do not delete a comment when changing a number.
+#
+# What these comments deliberately do NOT carry is the measurements the values were tuned from.
+# Every figure this pipeline has produced was measured on one specific capture, and a number
+# quoted here reads as a property of the pipeline when it is a property of that rig -- its bin
+# geometry, its exposure, its working distance. The measurements are recorded with the dataset
+# profile they were taken on, where their scope is unambiguous. What stays here is the part that
+# transfers: what each parameter trades, and how to re-sweep it.
+
+detection:
+  # SAM3 confidence threshold applied to proposals before matching.
+  # CONVENTIONAL, not measured: a deliberately permissive floor, because the rerank stage below is
+  # what is meant to remove weak proposals -- it can see render agreement, which a raw SAM3 score
+  # cannot. Raising it here would discard proposals before anything geometric has looked at them.
+  # Every SAM3 entry point reads this value; do not hardcode it in a script.
+  sam3_confidence_threshold: 0.2
+
+rerank:
+  # Proposal reranking after FoundationPose. "all" keeps every proposal (off); "soft_global_v1"
+  # applies the object-agnostic rule below. Defaults to soft_global_v1 so a bare run matches the
+  # configuration this pipeline was tuned and measured against.
+  policy: soft_global_v1
+  # MEASURED AND FITTED -- the 17 significant digits are not decoration, they are the raw output of
+  # a sweep over one dataset's result set (tools/sweep_rerank_cutoff.py). Two consequences worth
+  # knowing before editing it: it was tuned on a SINGLE dataset, so it is the least portable value
+  # in this file; and it is a threshold on the formula below, so changing either weights or cutoff
+  # without the other is meaningless.
+  cutoff: 4.19446449798917
+  # The weights ARE parsed from this string -- it is configuration, not a label. `--rerank-weight-*`
+  # overrides them per run, and the report records the weights actually applied.
+  # Why these terms: render_mask_iou carries the most weight because agreement between the CAD
+  # model rendered at the estimated pose and the proposal mask is the only term that can see
+  # whether the POSE is right; sam_score is a detection confidence and says nothing about pose;
+  # fp_score is FoundationPose's own score, divided down because its scale is unbounded.
+  formula: "2 * sam_score + 4 * render_mask_iou + 1 * render_box_iou - fp_score / 100"
+
+refinement:
+  # CAD box-prompt SAM3 refinement pass. "none" disables it; "replace_mid_nms06" replaces
+  # mid-overlap proposals and re-runs NMS at the threshold below. Defaults to replace_mid_nms06
+  # to match the configuration the other defaults here were measured against.
+  policy: replace_mid_nms06
+  # The band a proposal must fall in to be REPLACED by its CAD box-prompted refinement. Both
+  # bounds are conventional, and the shape of the rule is the point: below low_miou the pose is
+  # too wrong for a CAD-box prompt to be trustworthy, and above high_miou the proposal is already
+  # good enough that replacing it risks losing a correct mask. Only the ambiguous middle is
+  # refined.
+  low_miou: 0.2
+  high_miou: 0.8
+  # Conventional. Applied to the post-refinement set, which can contain near-duplicates when two
+  # proposals refine onto the same instance.
+  nms_threshold: 0.6
+
+pose:
+  # Your tolerance, not a verdict from this pipeline -- set both to whatever the application
+  # needs. What they define is a PASS RATE, not a percentile: at least
+  # `max_vertex_error_required_rate` of matched predictions must have a symmetry-aware max-vertex
+  # error at or below `max_vertex_error_threshold_mm`. That is not the same as "P99 error <= 5 mm";
+  # P99 is reported separately as max_vertex_error_mm_p99 and is deliberately never gated on,
+  # because at these slice sizes it is decided by one or two predictions.
+  # Both values are REQUIREMENTS, not measurements -- they state the target, not what is achieved.
+  # Consult the per-dataset results for the achieved rate before quoting either.
+  max_vertex_error_threshold_mm: 5.0
+  max_vertex_error_required_rate: 0.90
+  # Visibility bands the pose metrics are reported at. This filters *which matched instances
+  # get a pose measurement*, and deliberately not which instances are ground truth -- raising
+  # ground_truth.min_visible_fraction instead would delete occluded instances from GT, turning
+  # every detection of one into a false positive. That has been measured on an occluded capture,
+  # and the effect is large: precision falls by more than half at 0.9 with the prediction count
+  # UNCHANGED, so the drop is pure accounting rather than a real regression. Banding leaves
+  # detection accounting untouched.
+  # Every band is computed from a single run, so adding one costs nothing.
+  min_visible_fractions: [0.0, 0.9]
+
+ground_truth:
+  # BOP Challenge convention: only instances with >=10% of their projected surface visible are
+  # evaluated (consistent across BOP 2018-2024). Applied to a visibility fraction measured from
+  # the shared z-buffer in `evaluation/gt.py's render_gt_entries`, NOT to `scene_gt_info.json`'s
+  # `visib_fract` -- some captures leave that at 1.0 for every instance, including ones that are
+  # 3% visible. See `render_gt_entries` for the full rationale and the measured impact.
+  min_visible_fraction: 0.1
+  # Near plane for the GT z-buffer, in millimetres. CONVENTIONAL: it exists to keep geometry at
+  # the camera from being clipped, and any value well inside the working volume does that. It is
+  # not a tuned figure and no measurement depends on it.
+  rasterizer_near_mm: 1.0
+
+depth:
+  # FoundationStereo depth defaults. 800 px is the rectified width the model sees; it does not
+  # change the output resolution, which is always the full base-camera size. The useful width is
+  # dataset-specific -- it depends on how much of the frame survives rectification -- so treat
+  # this as a starting point and re-sweep it on a new rig.
+  foundation_stereo_max_width: 800
+  # TensorRT engine for the FoundationStereo model, built from a TAO `deployable_*` export with
+  # tools/build_tao_engine.py. Unset here on purpose: an engine is machine-specific, so it
+  # belongs in a dataset profile's `overrides:` rather than in a committed default.
+  #
+  # It runs through TAO Deploy in THIS process and THIS environment -- no FoundationStereo
+  # checkout, no subprocess per scene, and no per-scene interpreter start-up, torch import or
+  # checkpoint load -- only the engine deserialization, which the depth stage re-pays each scene
+  # so that TensorRT's scratch is not resident during pose.
+  #
+  # It is a path to an engine and not a name because an engine is machine-specific: it is built
+  # for one GPU architecture, one TensorRT version, one precision and one input shape, and none
+  # of that survives being copied to another machine. tools/build_tao_engine.py encodes all five
+  # in the filename and writes a sidecar recording the source ONNX's hash, so a stale engine is
+  # refused rather than used. Rebuild after any TensorRT upgrade -- including one driven by the
+  # FoundationPose SDK, which pins the same `tensorrt-cu13` version.
+  #
+  # The shape matters and is not a free choice: build it for the rectified size THIS dataset
+  # produces, padded up to a multiple of 32. Ask for it rather than guessing:
+  #   ./.venv/bin/python tools/build_tao_engine.py --onnx <deployable>.onnx \
+  #       --shape-from-scene <dataset_root>/<dataset>/<split>/000000
+  # A static profile (min=opt=max) is deliberate: TAO Deploy allocates its buffers at the
+  # profile's MAX shape, so a generous dynamic profile costs memory on every scene.
+  #
+  # See README.md's FoundationStereo section for the install and build steps.
+  #
+  # This is the BUILT `.engine` the command above writes
+  engine: null
+
+  # Working volume, in metres, used to keep disparity inside FoundationStereo's 416 px search
+  # range (a property of the model, not of the export).
+  #
+  # Disparity is f*B/Z, so the NEAR end sets the largest value the matcher is asked for. Past the
+  # range it CLAMPS rather than failing, and an under-estimated disparity is a surface placed too
+  # far away, in a depth map that still looks entirely plausible. Worked example: at a 0.43 m
+  # baseline a 0.55 m surface needs ~503 px against a 416 px range, so it clamps.
+  #
+  # Two things use these bounds, and neither needs ground truth -- f and B come from
+  # scene_camera.json and the volume is a property of the bin:
+  #   - the disparity pre-shift, which translates the right rectified image so the scene's
+  #     disparity window slides into range, and adds the shift back afterwards;
+  #   - partner ranking, which prefers a camera whose baseline keeps the near end feasible.
+  #
+  # Set them to the actual bin, TIGHTLY: their *difference* has to fit the 416 px range, so
+  # padding them costs the correction. The shift is a no-op when the scene already fits, which
+  # is why this is a volume rather than a single far distance -- an unconditional shift measurably
+  # hurt the datasets that were already good. Leave either null to disable both.
+  #
+  # The pre-shift has been measured to cut mean object MAE by roughly a third on a multi-capture
+  # set, and to help the worst decile by more than twice that -- it earns its place by rescuing
+  # the scenes that were furthest out of range, not by improving the median. The bounds are a
+  # property of the bin, not of the pipeline, so they are worth setting per dataset rather than
+  # inheriting: the values below fit ONE rig and are a starting point on any other.
+  min_working_distance_m: 0.55
+  max_working_distance_m: 1.20
+
+  # Contrast enhancement applied to both rectified views before matching; null disables it.
+  # It earns its place on a capture that is dark or low-contrast, and especially where specular
+  # faces clip bright while the part bodies sit close to the background's own luma range -- the
+  # matcher then has least contrast on exactly the surfaces that matter. On a well-exposed,
+  # well-separated capture there is less for it to recover.
+  #
+  # Measured to help on its own, and -- the part worth knowing before you drop it -- to COMPOSE
+  # with the disparity pre-shift rather than overlap it: the two together beat either alone, so
+  # they are not redundant preprocessing. The parameter surface is flat, with clip 1.5-8 and grid
+  # 4-16 all beating no preprocessing, so 3.0 is a comfortable middle rather than a tuned optimum
+  # -- and on a capture that is already well exposed it may buy nothing.
+  clahe_clip_limit: 3.0
+
+  # Detail-layer gain for the bilateral base/detail split that follows CLAHE; 0 disables it.
+  # Edge-preserving, so it amplifies scratch-scale texture without touching the base layer that
+  # carries left/right photometric agreement. Transforms that rewrite local mean and variance
+  # outright lose the trade instead -- both local contrast normalisation and a global shadow lift
+  # were measured to make object MAE WORSE, not better -- because stereo matching depends on the
+  # two views staying photometrically consistent. Preserve the base layer or do not filter.
+  clahe_detail_boost: 1.5
+
+
+validation:
+  # Acceptance thresholds for the GT-depth registration check, which asks whether a collected
+  # depth tree registers to the BOP ground-truth poses -- i.e. whether the ground truth itself is
+  # trustworthy, not whether the model is good.
+  #
+  # CONVENTIONAL, and chosen against what the check is FOR rather than fitted to an observed
+  # distribution: a tree that registers correctly measures well under a millimetre on object
+  # pixels, and one carrying a real registration error misses by tens of millimetres. Anything
+  # between those two separates them, so the exact value is not load-bearing. A failure here means
+  # the TREE is wrong, not that the threshold is tight -- resist relaxing it, and read the
+  # `--find-shift` output instead, which reports the best-fit pixel offset and names the cause.
+  tolerance_mm: 2.0
+  min_within_5mm: 0.95
+  # Offline rerank-cutoff sweep grid used by tools/sweep_rerank_cutoff.py. The entry
+  # 4.19446449798917 is intentionally identical to rerank.cutoff above: the tuned operating
+  # point sits inside its own sweep grid so the sweep reports it alongside its neighbours.
+  cutoffs:
+    - -1.0e9
+    - 0.0
+    - 1.0
+    - 1.5
+    - 2.0
+    - 2.25
+    - 2.5
+    - 2.75
+    - 3.0
+    - 3.25
+    - 3.5
+    - 3.75
+    - 4.0
+    - 4.19446449798917
+    - 4.5
+    - 5.0
+    - 5.5

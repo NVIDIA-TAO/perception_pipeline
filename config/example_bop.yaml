@@ -1,0 +1,150 @@
+# Template dataset profile. Copy this to config/<your-dataset>.yaml and edit.
+#
+#   cp config/example_bop.yaml config/my_dataset.yaml
+#   python script/run_pipeline.py --config my_dataset --dataset scene_group_01
+#
+# Algorithm behaviour (thresholds, rerank, refinement, depth width) is NOT configured here --
+# it lives in defaults.yaml and applies to every dataset. Use the `overrides:` block at the
+# bottom if this dataset needs different values.
+#
+# All relative paths resolve against this file's directory, not the working directory.
+
+dataset:
+  # Display name only; used in reports and log lines.
+  name: my_dataset
+
+  # Folder holding the per-dataset subfolders. The pipeline expects BOP layout underneath:
+  #   <root>/<dataset>/<split>/<scene id>/rgb/<image id>.png
+  #   <root>/<dataset>/<split>/<scene id>/scene_gt.json
+  #   <root>/<dataset>/<split>/<scene id>/scene_camera.json
+  #   <root>/<dataset>/<models_subdir>/obj_<id>.ply       + models_info.json
+  #   <root>/<dataset>/<models_eval_subdir>/obj_<id>.ply  + models_info.json
+  #   <root>/<dataset>/dataset_map.json             ({object name: object id})
+  #
+  # NOTE dataset_map.json is NOT part of the BOP spec -- BOP identifies objects by integer id
+  # only, and this pipeline prompts SAM3 with text, so it needs a name for each id. You write it.
+  root: ../../my_bop_datasets
+
+  # Which subfolders of `root` count as datasets when none is named explicitly.
+  # Use "*" to take every subdirectory.
+  glob: "*"
+
+  # BOP split subfolder holding the scenes.
+  split: test
+
+  # Which mesh directory each stage reads. Two keys, because BOP means two different things:
+  #
+  #   models_subdir      -- the mesh pose estimation and pose-conditioned RENDERING use, i.e.
+  #                         what render_mask_iou/render_box_iou are measured from, AND the mesh
+  #                         GroundTruthRenderer rasterises the ground-truth masks and boxes that
+  #                         every detection metric is scored against. Full-res CAD. One key for
+  #                         both on purpose: scoring vertices the pose stage never saw is silent
+  #                         and reads as model error.
+  #   models_eval_subdir -- the mesh the pose METRICS average over, and the models_info.json that
+  #                         supplies `diameter` and the symmetry declarations. BOP ships a
+  #                         decimated, roughly uniformly resampled copy for this, because
+  #                         ADD/ADD-S over a non-uniform mesh weights wherever the tessellation
+  #                         is dense rather than the object's shape.
+  #
+  # For a STANDARD BOP dataset, set:  models_subdir: models   /   models_eval_subdir: models_eval
+  # Omit models_eval_subdir and it follows models_subdir, which is right for a dataset shipping
+  # only one mesh directory. Omit models_subdir itself and it falls back to `models_cad`, NOT to
+  # `models`, so set the key explicitly unless your meshes really do live in models_cad/.
+  models_subdir: models
+  models_eval_subdir: models_eval
+
+  # Camera whose frame every result is expressed in. Depth, poses and overlays all use it.
+  base_camera_id: 0
+
+  # Where ground-truth depth lives, if you have it. YOU SUPPLY THIS -- the pipeline does not
+  # produce it and cannot obtain it for you. Layout:
+  #   <collected_depth_root>/<dataset>/<split>/<scene>/scene_cam<base_camera_id>_depth.png
+  # Format: 16-bit single-channel PNG, MILLIMETRES, 0 = no return -- the same convention BOP's
+  # own depth uses. The filename FOLLOWS base_camera_id above: the profile derives
+  # scene_cam<base_camera_id>_depth.png and every loader call site passes it, so the default
+  # base_camera_id: 0 means scene_cam0_depth.png and base_camera_id: 1 means scene_cam1_depth.png.
+  #
+  # It is needed ONLY to score predicted depth against ground truth. Everything else -- detection,
+  # pose, every metric in pose_summary.json -- runs without it. If you do not have it, pass
+  # --no-depth-metrics and the pipeline predicts its own depth and skips depth scoring; that is a
+  # fully supported path, not a degraded one. depth_summary.{json,csv} are then written empty.
+  collected_depth_root: ../../my_collected_depth
+
+  # Where the precomputed GT z-buffer cache is written. Regenerable, safe to delete.
+  gt_cache_root: ../gt_cache
+
+output:
+  # Root for per-dataset run outputs.
+  root: ../output
+  # Subfolder of `root` used by the batch runner for its aggregate report.
+  batch_subdir: batch_run
+
+# Text prompt per object name from dataset_map.json. Any object not listed falls back to its
+# object name with underscores replaced by spaces, which is often good enough.
+#
+# These are the text prompts SAM3 is given, so they should describe the object as it appears in
+# the image, not name its part number.
+prompts:
+  # my_object_name: a short natural-language description
+  {}
+
+# Which dataset the checks default to when you do not pass `--dataset`, and which slices a
+# before/after comparison should use.
+#
+# `clean_dataset` is the one that matters day to day: `test/check_engine_depth_smoke.py` takes its
+# `--dataset` default from it, so setting it is what lets that run with `--config` alone. Left
+# null it says so rather than guessing.
+#
+# Two entries rather than one because a single dataset cannot tell you much: pick one CLEAN
+# (every proposal a true positive, so it pins the happy path) and one HARD (occlusion, false
+# positives, a rerank that actually drops proposals). A change that passes only the clean one has
+# barely been tested. `*_scenes` is how many scenes of each a comparison uses, and it is read, not
+# decorative -- the regression gate takes its slice size from the key matching the gate you run,
+# and the slice size is recorded in the golden's filename, so changing one means re-cutting that
+# gate's golden. Do not set it below 8 without a reason: the pose metrics are means over the
+# matched predictions in the slice, and at 2 scenes one prediction moving carries several percent
+# of the comparison tolerance on its own.
+#
+# Leaving `occluded_dataset` null is a legitimate answer for a family with only one capture. The
+# gate then says so when asked for the occluded run, rather than quietly re-running the clean one.
+regression:
+  clean_dataset: null
+  clean_scenes: 8
+  occluded_dataset: null
+  occluded_scenes: 8
+
+# Per-dataset algorithm overrides. Mirrors the section structure of defaults.yaml; only the keys
+# you list are overridden, everything else falls through. Full precedence, lowest to highest:
+#
+#     config/defaults.yaml  ->  this `overrides:` block  ->  the matching CLI flag
+#
+# Every key here must exist in defaults.yaml. An unknown section or key is an error at launch, not
+# a no-op -- so a misindented line is reported rather than silently ignored.
+#
+# Mostly optional -- with ONE exception. `depth.engine` has no usable default: an engine is built
+# for one GPU architecture, one TensorRT version, one precision and one input shape, so no
+# committed path can be right on your machine. Set it here or pass --foundation-stereo-model on
+# every run; without either, a run stops at launch and says so. Build it first, and take the
+# shape from the scene rather than choosing one:
+#
+#   ./.venv/bin/python tools/build_tao_engine.py --onnx <deployable>.onnx \
+#       --shape-from-scene <root>/<dataset>/<split>/000000
+#
+# `--shape-from-scene` takes a path, not a profile, so it does not read `split` for you --
+# substitute the value set above.
+#
+# overrides:
+#   depth:
+#     engine: ../../models/<the .engine build_tao_engine.py wrote>   # relative to THIS file
+#     # THE WORKING VOLUME IS THE OTHER KEY A DIFFERENT RIG MUST SET, and getting it wrong does
+#     # not fail -- disparity CLAMPS past the model's range, which puts a surface too far away in
+#     # a depth map that still looks entirely plausible. Set it to the actual bin, tightly.
+#     min_working_distance_m: 0.55
+#     max_working_distance_m: 1.20
+#     # The rectified width the model sees. Tie it to the engine: a static engine fed a different
+#     # width rescales silently, so change this and rebuild together, never one alone.
+#     foundation_stereo_max_width: 800
+#   detection:
+#     sam3_confidence_threshold: 0.3
+#   ground_truth:
+#     min_visible_fraction: 0.2
