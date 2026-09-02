@@ -87,8 +87,8 @@ Three things this buys, each of which the old interleaved loop made impossible:
   FoundationPose are released before ground-truth rasterization begins and the "production path"
   number in `report.md` contains nothing that would not exist at deployment.
 
-The boundary is structural, and checked: `perception_pipeline.evaluation` is where everything
-that touches ground truth lives, and nothing in `perception_pipeline.inference` may reach it —
+The boundary is structural, and checked: `foundationpose_perception_pipeline.evaluation` is where everything
+that touches ground truth lives, and nothing in `foundationpose_perception_pipeline.inference` may reach it —
 directly or transitively. A static import-graph check fails the build if anything does; see
 [Layout](#layout).
 
@@ -104,7 +104,7 @@ pipeline/
     <dataset>.yaml           dataset profile: paths, prompts, regression datasets
     example_bop.yaml         annotated template to copy
 
-  src/perception_pipeline/   the importable package
+  src/foundationpose_perception_pipeline/   the importable package
     config.py                YAML loading, profile resolution, typed settings
     geometry.py              PLY I/O, both rasterizers, IoU, matching
     dataset.py               targets and prompts — no ground truth is rendered here, see

@@ -32,7 +32,7 @@ from typing import Any
 
 import numpy as np
 
-from perception_pipeline.inference.stereo.rectify import (
+from foundationpose_perception_pipeline.inference.stereo.rectify import (
     DEFAULT_MAX_DEPTH_PARALLAX,
     DEFAULT_MAX_VERTICAL_PARALLAX,
     DEFAULT_MIN_BASELINE_X,

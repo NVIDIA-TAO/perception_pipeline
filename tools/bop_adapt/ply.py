@@ -4,7 +4,7 @@
 """Convert ASCII PLY meshes to binary little-endian.
 
 Several BOP datasets ship their CAD meshes as ASCII PLY -- T-LESS's `models_cad/` is one, often
-alongside a `models_eval/` that is already binary. Two consumers cannot read ASCII: `perception_pipeline.geometry.read_binary_little_endian_ply`, which parses the
+alongside a `models_eval/` that is already binary. Two consumers cannot read ASCII: `foundationpose_perception_pipeline.geometry.read_binary_little_endian_ply`, which parses the
 header and then `np.frombuffer`s the body, and FoundationPose, which is handed the `.ply` path
 directly. Converting once while adapting the dataset is the fix; nothing downstream then has to
 care, and a dataset that already ships binary passes through unchanged.

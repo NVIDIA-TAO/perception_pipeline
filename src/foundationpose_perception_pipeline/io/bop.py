@@ -22,9 +22,9 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from perception_pipeline.dataset import prompt_for_object
-from perception_pipeline.inference.types import ObjectSpec
-from perception_pipeline.io.files import load_dataset_map
+from foundationpose_perception_pipeline.dataset import prompt_for_object
+from foundationpose_perception_pipeline.inference.types import ObjectSpec
+from foundationpose_perception_pipeline.io.files import load_dataset_map
 
 
 def dataset_scene_ids(dataset_dir: Path, split: str = "test") -> list[int]:

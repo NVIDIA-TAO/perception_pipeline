@@ -7,7 +7,7 @@ This is the depth path that ships. It runs a TAO `deployable_*` export as a Tens
 in the pipeline's own environment and in the pipeline's own process -- no FoundationStereo source
 checkout, no second venv, no subprocess per scene.
 
-    from perception_pipeline.inference.stereo import load_engine, scene_depth, write_scene_depth
+    from foundationpose_perception_pipeline.inference.stereo import load_engine, scene_depth, write_scene_depth
 
     depth = scene_depth(scene_dir, engine=load_engine(engine_path), max_width=800)
     write_scene_depth(depth, out_dir)
@@ -19,14 +19,14 @@ package is imported unless a caller asks for it, so a checkout without them stil
 other stage.
 """
 
-from perception_pipeline.inference.stereo.build import ShapeProfile, build_engine, engine_path_for
-from perception_pipeline.inference.stereo.depth import (
+from foundationpose_perception_pipeline.inference.stereo.build import ShapeProfile, build_engine, engine_path_for
+from foundationpose_perception_pipeline.inference.stereo.depth import (
     SceneDepth,
     StereoDepthError,
     scene_depth,
     write_scene_depth,
 )
-from perception_pipeline.inference.stereo.tao import StereoEngine, load_engine, normalize_for_model
+from foundationpose_perception_pipeline.inference.stereo.tao import StereoEngine, load_engine, normalize_for_model
 
 __all__ = [
     "SceneDepth",

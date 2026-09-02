@@ -43,7 +43,7 @@ import numpy as np
 PIPELINE_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PIPELINE_DIR / "src"))
 
-from perception_pipeline.config import add_config_argument, settings_from_argv  # noqa: E402
+from foundationpose_perception_pipeline.config import add_config_argument, settings_from_argv  # noqa: E402
 
 # Tolerance on the recovered shift. A working engine lands well inside a pixel; 2 px is
 # deliberately loose, because a fixed-shape engine resamples the pair to its own input size and
@@ -118,7 +118,7 @@ def main() -> None:
     # Imported here, not at module scope: `pycuda.autoinit` takes a CUDA context merely by being
     # imported, and this script should fail with a clear message about a missing engine before
     # touching the GPU at all.
-    from perception_pipeline.inference.stereo.tao import load_engine, release_engines
+    from foundationpose_perception_pipeline.inference.stereo.tao import load_engine, release_engines
 
     engine = load_engine(str(engine_path.resolve()))
     height, width = engine.fixed_hw or (DEFAULT_HEIGHT, DEFAULT_WIDTH)

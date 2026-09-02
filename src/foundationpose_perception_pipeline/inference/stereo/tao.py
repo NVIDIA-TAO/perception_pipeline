@@ -161,7 +161,7 @@ class StereoEngine:
 
         The TAO Deploy import is deferred to here, not done at module scope, for two reasons:
         `nvidia-tao-deploy` is an optional extra (`pip install '.[tao]'`), so a checkout without
-        it must still be able to import `perception_pipeline`; and TAO Deploy's inferencer
+        it must still be able to import `foundationpose_perception_pipeline`; and TAO Deploy's inferencer
         module does `import pycuda.autoinit`, which creates a CUDA context as a side effect of
         being imported. A run that never asks for this backend should pay neither cost.
 

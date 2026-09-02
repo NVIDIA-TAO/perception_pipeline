@@ -19,7 +19,7 @@ The cache is written under the active profile's `dataset.gt_cache_root`. It is r
 output, not source -- deleting it costs time, never correctness.
 """
 
-from perception_pipeline.evaluation.gt import main
+from foundationpose_perception_pipeline.evaluation.gt import main
 
 if __name__ == "__main__":
     main()

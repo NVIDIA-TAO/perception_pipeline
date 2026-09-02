@@ -15,8 +15,8 @@ import argparse
 import sys
 from pathlib import Path
 
-from perception_pipeline.config import FOUNDATIONPOSE_ROOT_DEFAULT
-from perception_pipeline.pose import ensure_foundationpose_paths
+from foundationpose_perception_pipeline.config import FOUNDATIONPOSE_ROOT_DEFAULT
+from foundationpose_perception_pipeline.pose import ensure_foundationpose_paths
 
 # FoundationPose is an external checkout, not a pip distribution, so its Python bindings have to
 # be put on the path explicitly -- `script/run_pipeline.py` does the same thing at module scope.

@@ -109,6 +109,62 @@ wheels = [
 ]
 
 [[package]]
+name = "foundationpose-perception-pipeline"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "einops" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "omegaconf" },
+    { name = "opencv-python" },
+    { name = "pillow" },
+    { name = "psutil" },
+    { name = "pycocotools" },
+    { name = "pyyaml" },
+    { name = "scipy" },
+    { name = "setuptools" },
+    { name = "torch" },
+    { name = "torchvision" },
+    { name = "tqdm" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "ruff" },
+]
+foundationpose = [
+    { name = "nvidia-cuda-runtime" },
+    { name = "tensorrt-cu13" },
+]
+report = [
+    { name = "markdown" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "einops", specifier = ">=0.8" },
+    { name = "markdown", marker = "extra == 'report'", specifier = ">=3.5" },
+    { name = "matplotlib", specifier = ">=3.8" },
+    { name = "numpy", specifier = ">=1.26,<2" },
+    { name = "nvidia-cuda-runtime", marker = "extra == 'foundationpose'" },
+    { name = "omegaconf", specifier = ">=2.3" },
+    { name = "opencv-python", specifier = "<5" },
+    { name = "pillow", specifier = ">=11" },
+    { name = "psutil", specifier = ">=7" },
+    { name = "pycocotools", specifier = ">=2.0.10" },
+    { name = "pyyaml", specifier = ">=6" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = "==0.16.2" },
+    { name = "scipy", specifier = "<1.16" },
+    { name = "setuptools", specifier = "<81" },
+    { name = "tensorrt-cu13", marker = "extra == 'foundationpose'", specifier = "==10.16.1.11" },
+    { name = "torch", specifier = "==2.10.0", index = "https://download.pytorch.org/whl/cu128" },
+    { name = "torchvision", specifier = "==0.25.0", index = "https://download.pytorch.org/whl/cu128" },
+    { name = "tqdm", specifier = ">=4.66" },
+]
+provides-extras = ["report", "dev", "foundationpose"]
+
+[[package]]
 name = "fsspec"
 version = "2026.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -441,62 +497,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/7d/fa/3944b40b07da9ce89
 wheels = [
     { url = "https://files.pythonhosted.org/packages/63/34/ba1c580383c9eada3711951fef0795c80b829a078d72188184bcab9dd527/packaging-26.3-py3-none-any.whl", hash = "sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c", size = 129956, upload-time = "2026-08-04T18:15:27.159Z" },
 ]
-
-[[package]]
-name = "perception-pipeline"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "einops" },
-    { name = "matplotlib" },
-    { name = "numpy" },
-    { name = "omegaconf" },
-    { name = "opencv-python" },
-    { name = "pillow" },
-    { name = "psutil" },
-    { name = "pycocotools" },
-    { name = "pyyaml" },
-    { name = "scipy" },
-    { name = "setuptools" },
-    { name = "torch" },
-    { name = "torchvision" },
-    { name = "tqdm" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "ruff" },
-]
-foundationpose = [
-    { name = "nvidia-cuda-runtime" },
-    { name = "tensorrt-cu13" },
-]
-report = [
-    { name = "markdown" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "einops", specifier = ">=0.8" },
-    { name = "markdown", marker = "extra == 'report'", specifier = ">=3.5" },
-    { name = "matplotlib", specifier = ">=3.8" },
-    { name = "numpy", specifier = ">=1.26,<2" },
-    { name = "nvidia-cuda-runtime", marker = "extra == 'foundationpose'" },
-    { name = "omegaconf", specifier = ">=2.3" },
-    { name = "opencv-python", specifier = "<5" },
-    { name = "pillow", specifier = ">=11" },
-    { name = "psutil", specifier = ">=7" },
-    { name = "pycocotools", specifier = ">=2.0.10" },
-    { name = "pyyaml", specifier = ">=6" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = "==0.16.2" },
-    { name = "scipy", specifier = "<1.16" },
-    { name = "setuptools", specifier = "<81" },
-    { name = "tensorrt-cu13", marker = "extra == 'foundationpose'", specifier = "==10.16.1.11" },
-    { name = "torch", specifier = "==2.10.0", index = "https://download.pytorch.org/whl/cu128" },
-    { name = "torchvision", specifier = "==0.25.0", index = "https://download.pytorch.org/whl/cu128" },
-    { name = "tqdm", specifier = ">=4.66" },
-]
-provides-extras = ["report", "dev", "foundationpose"]
 
 [[package]]
 name = "pillow"

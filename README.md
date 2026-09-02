@@ -1,4 +1,4 @@
-# Perception Pipeline
+# FoundationPose Perception Pipeline
 
 depth → SAM3 → FoundationPose evaluation on BOP-format datasets.
 
@@ -662,7 +662,7 @@ export FOUNDATIONPOSE_ROOT=$(realpath ../tao-foundation-pose-sdk)
 export LD_LIBRARY_PATH=".venv/lib/python3.12/site-packages/tensorrt_libs:.venv/lib/python3.12/site-packages/nvidia/cu13/lib:${LD_LIBRARY_PATH}"
 ```
 
-No `PYTHONPATH` is needed — `perception_pipeline` is an installed package. Do **not** add any
+No `PYTHONPATH` is needed — `foundationpose_perception_pipeline` is an installed package. Do **not** add any
 other environment's CUDA libraries to `LD_LIBRARY_PATH`: the pipeline's own torch resolves its
 cuDNN from the wheels above, and a foreign copy on the path is what makes it die with
 `Could not load symbol cudnnGetLibConfig`.

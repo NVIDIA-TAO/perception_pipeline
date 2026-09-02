@@ -46,7 +46,7 @@ PIPELINE_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = PIPELINE_ROOT.parent
 sys.path.insert(0, str(PIPELINE_ROOT / "src"))
 
-from perception_pipeline.config import (  # noqa: E402
+from foundationpose_perception_pipeline.config import (  # noqa: E402
     FOUNDATIONPOSE_ROOT_DEFAULT,
     KEEP_ALL_RERANK_POLICY,
     NO_REFINEMENT_POLICY,
@@ -54,30 +54,30 @@ from perception_pipeline.config import (  # noqa: E402
     rerank_weights_from_formula,
     settings_from_argv,
 )
-from perception_pipeline.dataset import image_path  # noqa: E402
-from perception_pipeline.inference import (  # noqa: E402
+from foundationpose_perception_pipeline.dataset import image_path  # noqa: E402
+from foundationpose_perception_pipeline.inference import (  # noqa: E402
     StagePredictions,
     TargetPrediction,
     proposals_from_stages,
 )
-from perception_pipeline.inference.depth import (  # noqa: E402
+from foundationpose_perception_pipeline.inference.depth import (  # noqa: E402
     add_backend_arguments,
     depth_backend_choices,
     resolve_backend,
 )
-from perception_pipeline.inference.engine import PoseEstimator  # noqa: E402
-from perception_pipeline.inference.source import (  # noqa: E402
+from foundationpose_perception_pipeline.inference.engine import PoseEstimator  # noqa: E402
+from foundationpose_perception_pipeline.inference.source import (  # noqa: E402
     add_source_arguments,
     depth_source_choices,
     registered_sources,
 )
-from perception_pipeline.io.bop import (  # noqa: E402
+from foundationpose_perception_pipeline.io.bop import (  # noqa: E402
     dataset_scene_ids,
     object_specs_for_scene,
     object_specs_from_names,
     scene_camera_matrix,
 )
-from perception_pipeline.pose import (  # noqa: E402
+from foundationpose_perception_pipeline.pose import (  # noqa: E402
     FoundationPoseRegistry,
     PoseRenderer,
     ensure_foundationpose_paths,
@@ -86,16 +86,16 @@ from perception_pipeline.pose import (  # noqa: E402
 
 # External checkouts must be locatable before any model import; see `inject_external_paths`.
 inject_external_paths(REPO_ROOT, FOUNDATIONPOSE_ROOT_DEFAULT)
-from perception_pipeline.inference.config import InferenceConfig  # noqa: E402
-from perception_pipeline.inference.detect import base_text_state_from_prompt_state  # noqa: E402
-from perception_pipeline.inference.pose import run_foundationpose_for_proposals  # noqa: E402
-from perception_pipeline.inference.refine import apply_sam3_refinement  # noqa: E402
-from perception_pipeline.inference.select import (  # noqa: E402
+from foundationpose_perception_pipeline.inference.config import InferenceConfig  # noqa: E402
+from foundationpose_perception_pipeline.inference.detect import base_text_state_from_prompt_state  # noqa: E402
+from foundationpose_perception_pipeline.inference.pose import run_foundationpose_for_proposals  # noqa: E402
+from foundationpose_perception_pipeline.inference.refine import apply_sam3_refinement  # noqa: E402
+from foundationpose_perception_pipeline.inference.select import (  # noqa: E402
     mark_selected_filter_results,
     select_proposals,
 )
-from perception_pipeline.runtime import inference_context, tensor_to_numpy  # noqa: E402
-from perception_pipeline.visualize import (  # noqa: E402
+from foundationpose_perception_pipeline.runtime import inference_context, tensor_to_numpy  # noqa: E402
+from foundationpose_perception_pipeline.visualize import (  # noqa: E402
     draw_overlay,
     draw_pose_filter_overlay,
     draw_scene_overlay,

@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-Perception Pipeline
+FoundationPose Perception Pipeline
 Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (see [LICENSE](LICENSE) in the root of this

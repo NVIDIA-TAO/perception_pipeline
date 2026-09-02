@@ -34,7 +34,7 @@ PIPELINE_DIR = Path(__file__).resolve().parents[1]
 REPO_ROOT = PIPELINE_DIR.parent
 sys.path.insert(0, str(PIPELINE_DIR / "src"))
 
-from perception_pipeline.config import (  # noqa: E402
+from foundationpose_perception_pipeline.config import (  # noqa: E402
     add_config_argument,
     settings_from_argv,
 )
@@ -72,7 +72,7 @@ def check_engine(args) -> tuple[dict, np.ndarray]:
     No subprocess and no second interpreter: that is the whole point of this backend, so the
     check exercises it the way the pipeline does rather than through a CLI.
     """
-    from perception_pipeline.inference.stereo import load_engine, scene_depth
+    from foundationpose_perception_pipeline.inference.stereo import load_engine, scene_depth
 
     scene_dir = args.dataset_root / args.dataset / "test" / f"{args.scene:06d}"
     if not scene_dir.exists():

@@ -16,7 +16,7 @@ from typing import Any
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-from perception_pipeline.pose import PoseFilterResult
+from foundationpose_perception_pipeline.pose import PoseFilterResult
 
 
 def color_for_index(index: int) -> tuple[int, int, int]:

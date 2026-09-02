@@ -54,7 +54,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from perception_pipeline.config import (
+from foundationpose_perception_pipeline.config import (
     DEFAULT_RERANK_POLICY,
     DEFAULT_SAM3_REFINEMENT_POLICY,
     FOUNDATIONPOSE_ROOT_DEFAULT,
@@ -66,20 +66,20 @@ from perception_pipeline.config import (
     rerank_weights_from_formula,
     settings_from_argv,
 )
-from perception_pipeline.inference.depth import (
+from foundationpose_perception_pipeline.inference.depth import (
     add_backend_arguments,
     depth_backend_choices,
 )
-from perception_pipeline.inference.source import (
+from foundationpose_perception_pipeline.inference.source import (
     add_source_arguments,
     depth_source_choices,
     registered_sources,
 )
-from perception_pipeline.pose import inject_external_paths
+from foundationpose_perception_pipeline.pose import inject_external_paths
 
 PIPELINE_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = PIPELINE_ROOT.parent
-# The pipeline's own modules come from the installed `perception_pipeline` package, so only the
+# The pipeline's own modules come from the installed `foundationpose_perception_pipeline` package, so only the
 # external checkouts -- sam3 and FoundationPose -- still need injecting onto sys.path. This is
 # the SHARED bootstrap rather than a copy of it: the same four steps were written out here and
 # in `infer.py`, which is the arrangement `inject_external_paths` exists to prevent -- its

@@ -319,7 +319,7 @@ already run for every scene, which is an expensive way to learn it.
 
 `FOUNDATIONPOSE_ROOT` is read at import time, before argparse runs — `--foundationpose-root` alone
 does not substitute for it; set both consistently if that flag is used. No `PYTHONPATH`:
-`perception_pipeline` is an installed package, and a `ModuleNotFoundError` for it means
+`foundationpose_perception_pipeline` is an installed package, and a `ModuleNotFoundError` for it means
 `uv pip install -e .`, not a path hack. Do **not** put another venv's libraries on this path.
 
 ## 6. Verify

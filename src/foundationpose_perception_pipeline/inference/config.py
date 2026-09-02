@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """Per-stage configuration for the inference path.
 
-**Distinct from `perception_pipeline.config`**, which loads YAML profiles and tuned defaults
+**Distinct from `foundationpose_perception_pipeline.config`**, which loads YAML profiles and tuned defaults
 from disk. These are the small, immutable objects a stage actually needs at call time. The
 former answers "what are the defaults for this deployment"; the latter answers "what is this
 one stage configured to do right now".

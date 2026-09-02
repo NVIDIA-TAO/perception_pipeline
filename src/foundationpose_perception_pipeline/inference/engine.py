@@ -23,7 +23,7 @@ from typing import Any
 
 import numpy as np
 
-from perception_pipeline.inference.config import InferenceConfig
+from foundationpose_perception_pipeline.inference.config import InferenceConfig
 
 
 @dataclass

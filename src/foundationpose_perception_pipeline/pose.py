@@ -19,7 +19,7 @@ from typing import Any
 
 import numpy as np
 
-from perception_pipeline.config import foundationpose_root_missing_message, help_requested
+from foundationpose_perception_pipeline.config import foundationpose_root_missing_message, help_requested
 
 
 @dataclass(frozen=True)
@@ -51,7 +51,7 @@ class PoseRenderer:
 
     def mesh(self, dataset: str, obj_id: int) -> tuple[np.ndarray, np.ndarray]:
         """Load and cache the render mesh for one dataset/object pair."""
-        from perception_pipeline.geometry import read_binary_little_endian_ply
+        from foundationpose_perception_pipeline.geometry import read_binary_little_endian_ply
 
         key = (dataset, obj_id)
         if key not in self.mesh_cache:
@@ -68,7 +68,7 @@ class PoseRenderer:
         image_size: tuple[int, int],
     ) -> np.ndarray:
         """Render the object's silhouette from one predicted FoundationPose pose."""
-        from perception_pipeline.geometry import render_mask
+        from foundationpose_perception_pipeline.geometry import render_mask
 
         vertices, faces = self.mesh(dataset, obj_id)
         rotation = pose_row_major[:3, :3].astype(np.float64)
