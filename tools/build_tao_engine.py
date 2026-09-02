@@ -50,8 +50,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from perception_pipeline.config import add_config_argument, settings_from_argv
-from perception_pipeline.inference.stereo.build import (
+from foundationpose_perception_pipeline.config import add_config_argument, settings_from_argv
+from foundationpose_perception_pipeline.inference.stereo.build import (
     PRECISIONS,
     ShapeProfile,
     build_engine,
@@ -73,8 +73,8 @@ def rectified_shape_for_scene(scene_dir: Path, base_camera: int, max_width: int)
     width rather than padding to it, so the height follows from the padded width. See that
     function for the failure this avoids.
     """
-    from perception_pipeline.inference.stereo.depth import load_cameras, read_rgb
-    from perception_pipeline.inference.stereo.rectify import rectify_pair, select_partner_camera
+    from foundationpose_perception_pipeline.inference.stereo.depth import load_cameras, read_rgb
+    from foundationpose_perception_pipeline.inference.stereo.rectify import rectify_pair, select_partner_camera
 
     intrinsics, extrinsics, _ = load_cameras(scene_dir)
     sample = read_rgb(scene_dir / "rgb" / f"{base_camera:06d}.png")

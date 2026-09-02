@@ -13,9 +13,9 @@ inside `run_pipeline.main`, because the report already had to exclude GT cost fr
 "production path only" runtime figure. This package makes the same boundary structural.
 """
 
-from perception_pipeline.evaluation.detection import score_detection
-from perception_pipeline.evaluation.gt import render_target_gt
-from perception_pipeline.evaluation.pose_error import PoseMatchMetric, score_matched_poses
+from foundationpose_perception_pipeline.evaluation.detection import score_detection
+from foundationpose_perception_pipeline.evaluation.gt import render_target_gt
+from foundationpose_perception_pipeline.evaluation.pose_error import PoseMatchMetric, score_matched_poses
 
 __all__ = [
     "PoseMatchMetric",

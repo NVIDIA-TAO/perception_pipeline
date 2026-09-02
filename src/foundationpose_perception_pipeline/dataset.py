@@ -16,8 +16,8 @@ from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
-from perception_pipeline.config import active_settings
-from perception_pipeline.io.files import load_dataset_map, load_json
+from foundationpose_perception_pipeline.config import active_settings
+from foundationpose_perception_pipeline.io.files import load_dataset_map, load_json
 
 
 @dataclass(frozen=True)

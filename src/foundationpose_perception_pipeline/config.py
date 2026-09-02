@@ -36,7 +36,7 @@ from typing import Any
 
 import yaml
 
-# src/perception_pipeline/config.py -> src/perception_pipeline -> src -> pipeline/
+# src/foundationpose_perception_pipeline/config.py -> src/foundationpose_perception_pipeline -> src -> pipeline/
 PIPELINE_ROOT = Path(__file__).resolve().parents[2]
 CONFIG_DIR = PIPELINE_ROOT / "config"
 DEFAULTS_PATH = CONFIG_DIR / "defaults.yaml"

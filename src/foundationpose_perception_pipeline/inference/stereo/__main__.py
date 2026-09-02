@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """Run the commercial depth path on one scene.
 
-    ./.venv/bin/python -m perception_pipeline.inference.stereo \\
+    ./.venv/bin/python -m foundationpose_perception_pipeline.inference.stereo \\
         --scene-dir <dataset_root>/<dataset>/test/000000 \\
         --out-dir /tmp/fs --engine <path>.engine
 
@@ -16,7 +16,7 @@ A separate module from `depth.py` so that `python -m ...stereo` does not re-exec
 package `__init__` has already imported, which makes runpy warn about unpredictable behaviour.
 """
 
-from perception_pipeline.inference.stereo.depth import main
+from foundationpose_perception_pipeline.inference.stereo.depth import main
 
 if __name__ == "__main__":
     main()

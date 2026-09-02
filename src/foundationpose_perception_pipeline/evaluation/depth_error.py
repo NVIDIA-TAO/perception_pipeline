@@ -20,12 +20,12 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from perception_pipeline.dataset import targets_for_scene_frame0
-from perception_pipeline.evaluation.gt import GroundTruthRenderer, render_gt_entries, render_gt_entries_cached
+from foundationpose_perception_pipeline.dataset import targets_for_scene_frame0
+from foundationpose_perception_pipeline.evaluation.gt import GroundTruthRenderer, render_gt_entries, render_gt_entries_cached
 
 # Reading a collected depth PNG is an IO concern, not a scoring one, so it lives in `io.bop`
 # where any caller can reach it without importing anything from this package.
-from perception_pipeline.io.bop import load_collected_depth_m  # noqa: F401
+from foundationpose_perception_pipeline.io.bop import load_collected_depth_m  # noqa: F401
 
 
 def resize_depth_nearest(depth_m: np.ndarray, target_size_wh: tuple[int, int]) -> np.ndarray:

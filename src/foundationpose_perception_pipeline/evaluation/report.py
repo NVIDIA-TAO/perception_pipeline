@@ -13,8 +13,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from perception_pipeline.config import DEFAULT_POSE_MIN_VISIBLE_FRACTIONS
-from perception_pipeline.evaluation.detection import (
+from foundationpose_perception_pipeline.config import DEFAULT_POSE_MIN_VISIBLE_FRACTIONS
+from foundationpose_perception_pipeline.evaluation.detection import (
     depth_overall_summary,
     detection_counts_from_summary,
     finalize_detection,

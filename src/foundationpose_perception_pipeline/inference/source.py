@@ -14,11 +14,11 @@ source that reads depth from disk needs no backend, and a new backend needs no n
 Registering one is the same shape as registering a backend, and for the same reason -- the CLI
 choices are the registry keys, so an entry point never enumerates what exists:
 
-    from perception_pipeline.inference.source import DepthSource, register_source
+    from foundationpose_perception_pipeline.inference.source import DepthSource, register_source
 
     register_source(DepthSource(name="mine", describe="…", provide=…))
 
-See `perception_pipeline.extensions` for how a package outside this one gets loaded.
+See `foundationpose_perception_pipeline.extensions` for how a package outside this one gets loaded.
 """
 
 from __future__ import annotations
@@ -70,7 +70,7 @@ def register_source(source: DepthSource) -> None:
 
 def registered_sources() -> dict[str, DepthSource]:
     """Return the registry, extensions included."""
-    from perception_pipeline.extensions import load_extensions
+    from foundationpose_perception_pipeline.extensions import load_extensions
 
     load_extensions()
     return dict(_SOURCES)
@@ -97,7 +97,7 @@ def provide_predicted_depth(
     **_ignored: Any,
 ) -> np.ndarray:
     """Predict depth from the scene's stereo pair, through the resolved depth backend."""
-    from perception_pipeline.inference.depth import backend_options, generate_scene_depth
+    from foundationpose_perception_pipeline.inference.depth import backend_options, generate_scene_depth
 
     generate_scene_depth(
         scene_dir=scene_dir,

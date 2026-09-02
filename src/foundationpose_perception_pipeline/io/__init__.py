@@ -10,6 +10,6 @@ a module beside `bop.py` rather than by threading paths through the pipeline.
 Deliberately re-exports nothing. `bop` imports `dataset`, and `dataset` imports `files`, so an
 eager re-export here would make importing *any* of them circular. Import the module you want:
 
-    from perception_pipeline.io.bop import object_specs_for_scene
-    from perception_pipeline.io.files import load_json
+    from foundationpose_perception_pipeline.io.bop import object_specs_for_scene
+    from foundationpose_perception_pipeline.io.files import load_json
 """

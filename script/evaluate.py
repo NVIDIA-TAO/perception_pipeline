@@ -40,32 +40,32 @@ import numpy as np
 PIPELINE_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PIPELINE_ROOT / "src"))
 
-from perception_pipeline.config import (  # noqa: E402
+from foundationpose_perception_pipeline.config import (  # noqa: E402
     NO_REFINEMENT_POLICY,
     REPLACE_MID_NMS06_REFINEMENT_POLICY,
     SOFT_GLOBAL_RERANK_POLICY,
     add_config_argument,
     settings_from_argv,
 )
-from perception_pipeline.dataset import Target  # noqa: E402
-from perception_pipeline.evaluation import (  # noqa: E402
+from foundationpose_perception_pipeline.dataset import Target  # noqa: E402
+from foundationpose_perception_pipeline.evaluation import (  # noqa: E402
     render_target_gt,
     score_detection,
     score_matched_poses,
 )
-from perception_pipeline.evaluation.depth_error import (  # noqa: E402
+from foundationpose_perception_pipeline.evaluation.depth_error import (  # noqa: E402
     compare_depths,
     load_collected_depth_m,
     scene_object_mask,
 )
-from perception_pipeline.evaluation.detection import (  # noqa: E402
+from foundationpose_perception_pipeline.evaluation.detection import (  # noqa: E402
     PoseMetricRegistry,
     accumulate_detection,
     compact_metrics,
     detection_template,
 )
-from perception_pipeline.evaluation.gt import GroundTruthRenderer  # noqa: E402
-from perception_pipeline.evaluation.report import PipelineReportConfig, write_pipeline_outputs  # noqa: E402
+from foundationpose_perception_pipeline.evaluation.gt import GroundTruthRenderer  # noqa: E402
+from foundationpose_perception_pipeline.evaluation.report import PipelineReportConfig, write_pipeline_outputs  # noqa: E402
 
 
 class _PoseOnlyResult:

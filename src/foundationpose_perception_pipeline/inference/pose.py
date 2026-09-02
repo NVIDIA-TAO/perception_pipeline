@@ -15,9 +15,9 @@ from typing import Any
 import cv2
 import numpy as np
 
-from perception_pipeline.dataset import Target
-from perception_pipeline.geometry import bbox_from_mask, binary_mask_iou, box_iou
-from perception_pipeline.pose import PoseFilterResult, PoseRenderer
+from foundationpose_perception_pipeline.dataset import Target
+from foundationpose_perception_pipeline.geometry import bbox_from_mask, binary_mask_iou, box_iou
+from foundationpose_perception_pipeline.pose import PoseFilterResult, PoseRenderer
 
 
 def resize_mask_nearest(mask: np.ndarray, target_size_wh: tuple[int, int]) -> np.ndarray:

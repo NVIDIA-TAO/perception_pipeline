@@ -24,7 +24,7 @@ sys.path.insert(0, str(PIPELINE_ROOT / "src"))
 sys.path.insert(0, str(PIPELINE_ROOT / "tools"))
 
 from bop_adapt.datasets import tless  # noqa: E402
-from perception_pipeline.config import add_config_argument, settings_from_argv  # noqa: E402
+from foundationpose_perception_pipeline.config import add_config_argument, settings_from_argv  # noqa: E402
 
 REGISTRY = {module.NAME: module for module in (tless,)}
 

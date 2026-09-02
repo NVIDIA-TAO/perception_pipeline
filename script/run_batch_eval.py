@@ -5,7 +5,7 @@
 
 Every dataset runs the same configuration as ``script/run_pipeline.py``, so a bare invocation of
 either measures the same path. ``--depth-source`` offers whatever is registered; see
-``perception_pipeline.inference.source``.
+``foundationpose_perception_pipeline.inference.source``.
 """
 
 from __future__ import annotations
@@ -19,29 +19,29 @@ import time
 from pathlib import Path
 from typing import Any
 
-from perception_pipeline.config import (
+from foundationpose_perception_pipeline.config import (
     DEFAULT_DATE,
     DEFAULT_RERANK_CUTOFF,
     DEFAULT_RERANK_FORMULA,
     add_config_argument,
     settings_from_argv,
 )
-from perception_pipeline.config import (
+from foundationpose_perception_pipeline.config import (
     DEFAULT_SAM3_REFINEMENT_HIGH_MIOU as DEFAULT_REFINEMENT_HIGH_MIOU,
 )
-from perception_pipeline.config import (
+from foundationpose_perception_pipeline.config import (
     DEFAULT_SAM3_REFINEMENT_LOW_MIOU as DEFAULT_REFINEMENT_LOW_MIOU,
 )
-from perception_pipeline.config import (
+from foundationpose_perception_pipeline.config import (
     DEFAULT_SAM3_REFINEMENT_NMS_THRESHOLD as DEFAULT_REFINEMENT_NMS_THRESHOLD,
 )
-from perception_pipeline.evaluation.report import MultiDatasetReportConfig, MultiDatasetReportGenerator
-from perception_pipeline.inference.depth import (
+from foundationpose_perception_pipeline.evaluation.report import MultiDatasetReportConfig, MultiDatasetReportGenerator
+from foundationpose_perception_pipeline.inference.depth import (
     add_backend_arguments,
     backend_forwarded_flags,
     depth_backend_choices,
 )
-from perception_pipeline.inference.source import (
+from foundationpose_perception_pipeline.inference.source import (
     add_source_arguments,
     depth_source_choices,
     registered_sources,

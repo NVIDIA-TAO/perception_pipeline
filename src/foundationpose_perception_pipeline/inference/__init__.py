@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """The deployable path: images and intrinsics in, poses out.
 
-**Nothing in this package may import `perception_pipeline.evaluation`, read `scene_gt.json`, or
+**Nothing in this package may import `foundationpose_perception_pipeline.evaluation`, read `scene_gt.json`, or
 take a ground-truth argument.** That is the whole point of the split: what runs here is what
 would run on a robot, and the only way to keep that true is to make the dependency impossible
 rather than merely discouraged.
@@ -13,7 +13,7 @@ objects to look for*. That is a task specification, not a measurement -- a deplo
 it as configuration. See `ObjectSpec`.
 """
 
-from perception_pipeline.inference.types import (
+from foundationpose_perception_pipeline.inference.types import (
     ObjectSpec,
     ProposalPrediction,
     SceneInput,

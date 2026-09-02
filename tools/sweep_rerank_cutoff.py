@@ -25,13 +25,13 @@ from typing import Any
 import cv2
 import numpy as np
 
-from perception_pipeline.config import (
+from foundationpose_perception_pipeline.config import (
     DEFAULT_CUTOFFS,
     DEFAULT_RERANK_CUTOFF,
     add_config_argument,
     settings_from_argv,
 )
-from perception_pipeline.geometry import (
+from foundationpose_perception_pipeline.geometry import (
     bbox_from_mask,
     box_iou,
     greedy_match,

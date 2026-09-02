@@ -21,7 +21,7 @@ function. See `stereo/rectify.py` for the invariants the geometry has to hold to
 Runnable as a module for one-scene debugging, and as an escape hatch if the in-process CUDA
 context ever needs isolating again -- see `__main__.py`:
 
-    ./.venv/bin/python -m perception_pipeline.inference.stereo \\
+    ./.venv/bin/python -m foundationpose_perception_pipeline.inference.stereo \\
         --scene-dir <dataset_root>/<dataset>/test/000000 --out-dir /tmp/fs --engine <path>.engine
 """
 
@@ -37,8 +37,8 @@ from typing import Any
 import cv2
 import numpy as np
 
-from perception_pipeline.inference.stereo.rectify import rectify_pair, select_partner_camera
-from perception_pipeline.inference.stereo.tao import (
+from foundationpose_perception_pipeline.inference.stereo.rectify import rectify_pair, select_partner_camera
+from foundationpose_perception_pipeline.inference.stereo.tao import (
     StereoEngine,
     disparity_to_depth_m,
     fit_to_model,

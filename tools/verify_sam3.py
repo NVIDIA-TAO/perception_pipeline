@@ -22,7 +22,7 @@ from PIL import Image, ImageDraw
 from sam3.model.sam3_image_processor import Sam3Processor
 from sam3.model_builder import build_sam3_image_model
 
-from perception_pipeline.runtime import inference_context, tensor_to_numpy
+from foundationpose_perception_pipeline.runtime import inference_context, tensor_to_numpy
 
 
 def make_synthetic_image(size: int = 1024) -> Image.Image:

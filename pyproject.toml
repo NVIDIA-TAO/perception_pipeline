@@ -1,5 +1,5 @@
 [project]
-name = "perception-pipeline"
+name = "foundationpose-perception-pipeline"
 version = "0.1.0"
 description = "depth -> SAM3 -> FoundationPose evaluation pipeline for BOP-format datasets"
 readme = "README.md"

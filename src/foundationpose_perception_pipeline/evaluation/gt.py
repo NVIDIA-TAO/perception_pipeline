@@ -62,16 +62,16 @@ from typing import Any
 import numpy as np
 from PIL import Image
 
-from perception_pipeline.config import (
+from foundationpose_perception_pipeline.config import (
     DEFAULT_MIN_VISIBLE_FRACTION,
     GT_RASTERIZER_NEAR_MM,
     active_settings,
     add_config_argument,
     settings_from_argv,
 )
-from perception_pipeline.dataset import Target, dataset_dirs, scene_path
-from perception_pipeline.geometry import bbox_from_mask, rasterize_mesh, render_mask
-from perception_pipeline.io.files import load_json
+from foundationpose_perception_pipeline.dataset import Target, dataset_dirs, scene_path
+from foundationpose_perception_pipeline.geometry import bbox_from_mask, rasterize_mesh, render_mask
+from foundationpose_perception_pipeline.io.files import load_json
 
 
 def default_cache_root() -> Path:
@@ -230,7 +230,7 @@ def render_gt_entries_cached(
     of time to avoid paying that cost inside a pipeline run.
 
     That fallback is the path a warm machine never takes, so keep it callable: it was a deferred
-    `from perception_pipeline.dataset import render_gt_entries` left behind when the function
+    `from foundationpose_perception_pipeline.dataset import render_gt_entries` left behind when the function
     moved into this module, and it raised ImportError on the first cache miss -- which on a
     machine with a fully populated `gt_cache/` is never, and on a fresh checkout is immediately.
     """
@@ -355,7 +355,7 @@ class GroundTruthRenderer:
 
     def mesh(self, dataset: str, obj_id: int) -> tuple[np.ndarray, np.ndarray]:
         """Load and cache the BOP model mesh for one dataset/object pair."""
-        from perception_pipeline.geometry import read_binary_little_endian_ply
+        from foundationpose_perception_pipeline.geometry import read_binary_little_endian_ply
 
         key = (dataset, obj_id)
         if key not in self.mesh_cache:
@@ -383,7 +383,7 @@ class GroundTruthRenderer:
 
     def render_target(self, target: Target, image_size: tuple[int, int]) -> tuple[list[np.ndarray], np.ndarray]:
         """Render all visible GT masks and boxes for one target object in one frame."""
-        from perception_pipeline.geometry import bbox_from_mask, render_mask
+        from foundationpose_perception_pipeline.geometry import bbox_from_mask, render_mask
 
         vertices, faces = self.mesh(target.dataset, target.obj_id)
         frame_key = str(target.im_id)
@@ -458,7 +458,7 @@ def render_gt_entries(
     `kept_entries` are what `matched_pose_metrics.gt_index` refers to -- any other GT lookup
     that filters differently will misalign them (see `generate_report.aggregate_outputs`).
     """
-    from perception_pipeline.geometry import bbox_from_mask, rasterize_mesh, render_mask
+    from foundationpose_perception_pipeline.geometry import bbox_from_mask, rasterize_mesh, render_mask
 
     frame_key = str(target.im_id)
     camera_matrix = np.asarray(renderer.scene_camera(target)[frame_key]["cam_K"], dtype=np.float64).reshape(3, 3)

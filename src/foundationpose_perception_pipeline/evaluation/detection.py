@@ -17,7 +17,7 @@ from typing import Any
 import numpy as np
 from scipy.spatial import cKDTree
 
-from perception_pipeline.io.files import load_dataset_map
+from foundationpose_perception_pipeline.io.files import load_dataset_map
 
 
 def score_detection(
@@ -96,7 +96,7 @@ def iou_matrices(
     gt_masks: list[np.ndarray],
 ) -> tuple[np.ndarray, np.ndarray]:
     """Compute pairwise box IoUs and mask IoUs between predictions and GT."""
-    from perception_pipeline.geometry import box_iou
+    from foundationpose_perception_pipeline.geometry import box_iou
 
     box_ious = np.zeros((len(pred_boxes), len(gt_boxes)), dtype=np.float64)
     for pred_idx, pred_box in enumerate(pred_boxes):
@@ -116,7 +116,7 @@ def iou_matrices(
 
 def metrics_for_thresholds(iou_matrix: np.ndarray, thresholds: list[float]) -> dict[str, Any]:
     """Run greedy matching metrics at each requested IoU threshold."""
-    from perception_pipeline.geometry import greedy_match
+    from foundationpose_perception_pipeline.geometry import greedy_match
 
     return {str(threshold): greedy_match(iou_matrix, threshold) for threshold in thresholds}
 
@@ -357,7 +357,7 @@ class PoseMetricRegistry:
 
     def vertices(self, dataset: str, obj_id: int) -> np.ndarray:
         """Load and cache CAD vertices for one dataset/object pair."""
-        from perception_pipeline.geometry import read_binary_little_endian_ply
+        from foundationpose_perception_pipeline.geometry import read_binary_little_endian_ply
 
         key = (dataset, obj_id)
         if key not in self.vertices_cache:

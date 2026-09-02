@@ -17,9 +17,9 @@ from typing import Any
 
 import numpy as np
 
-from perception_pipeline.config import KEEP_ALL_RERANK_POLICY, SOFT_GLOBAL_RERANK_POLICY
-from perception_pipeline.inference.config import SelectionConfig
-from perception_pipeline.pose import PoseFilterResult
+from foundationpose_perception_pipeline.config import KEEP_ALL_RERANK_POLICY, SOFT_GLOBAL_RERANK_POLICY
+from foundationpose_perception_pipeline.inference.config import SelectionConfig
+from foundationpose_perception_pipeline.pose import PoseFilterResult
 
 
 def rerank_formula_text(config: SelectionConfig) -> str:

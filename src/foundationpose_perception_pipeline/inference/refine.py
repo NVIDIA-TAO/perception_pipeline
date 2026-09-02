@@ -16,14 +16,14 @@ from typing import Any
 import numpy as np
 from PIL import Image
 
-from perception_pipeline.config import NO_REFINEMENT_POLICY, REPLACE_MID_NMS06_REFINEMENT_POLICY
-from perception_pipeline.dataset import Target
-from perception_pipeline.geometry import binary_mask_iou
-from perception_pipeline.inference.config import RefinementConfig
-from perception_pipeline.inference.detect import base_text_state_from_prompt_state  # noqa: F401
-from perception_pipeline.pose import PoseFilterResult, PoseRenderer
-from perception_pipeline.runtime import inference_context, tensor_to_numpy
-from perception_pipeline.visualize import xyxy_to_norm_cxcywh
+from foundationpose_perception_pipeline.config import NO_REFINEMENT_POLICY, REPLACE_MID_NMS06_REFINEMENT_POLICY
+from foundationpose_perception_pipeline.dataset import Target
+from foundationpose_perception_pipeline.geometry import binary_mask_iou
+from foundationpose_perception_pipeline.inference.config import RefinementConfig
+from foundationpose_perception_pipeline.inference.detect import base_text_state_from_prompt_state  # noqa: F401
+from foundationpose_perception_pipeline.pose import PoseFilterResult, PoseRenderer
+from foundationpose_perception_pipeline.runtime import inference_context, tensor_to_numpy
+from foundationpose_perception_pipeline.visualize import xyxy_to_norm_cxcywh
 
 
 def apply_mask_nms_with_indices(

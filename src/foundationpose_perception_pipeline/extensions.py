@@ -11,13 +11,13 @@ checkout is a checkout that cannot be updated.
 So both are **registries**, and this module is the loader that lets something outside the package
 fill them in:
 
-    # perception_pipeline_extras/__init__.py, anywhere on PYTHONPATH
-    from perception_pipeline.inference.depth import register_backend
+    # foundationpose_perception_pipeline_extras/__init__.py, anywhere on PYTHONPATH
+    from foundationpose_perception_pipeline.inference.depth import register_backend
 
     register_backend("mine", claims=lambda model: str(model).endswith(".mine"), generate=...)
 
 `load_extensions()` imports every module named in `$PERCEPTION_PIPELINE_EXTENSIONS`
-(comma-separated), then `perception_pipeline_extras` if it is importable. Neither has to exist --
+(comma-separated), then `foundationpose_perception_pipeline_extras` if it is importable. Neither has to exist --
 a plain checkout has neither and loads nothing.
 
 **Import, not entry points.** A package that registers on import needs no install step and no
@@ -46,7 +46,7 @@ ENVIRONMENT_VARIABLE = "PERCEPTION_PIPELINE_EXTENSIONS"
 DISABLE_VARIABLE = "PERCEPTION_PIPELINE_NO_EXTENSIONS"
 # Imported if present, so a site can register by putting a package of this name on PYTHONPATH
 # rather than by setting an environment variable on every invocation.
-CONVENTIONAL_MODULE = "perception_pipeline_extras"
+CONVENTIONAL_MODULE = "foundationpose_perception_pipeline_extras"
 
 _loaded = False
 

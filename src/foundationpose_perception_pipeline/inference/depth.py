@@ -9,13 +9,13 @@ activity that lives in `evaluation/`.
 
 **One backend ships, and it is a registry entry like any other.** `commercial` runs a TAO
 `deployable_*` export as a TensorRT engine through TAO Deploy, in this environment and this
-process -- see `perception_pipeline.inference.stereo`. A function call, not a process: no
+process -- see `foundationpose_perception_pipeline.inference.stereo`. A function call, not a process: no
 interpreter start-up, no torch import, no CUDA context creation per scene, and the depth comes
 back as arrays rather than through a `.npy` round-trip. What it does still re-pay per scene is
 deserializing the engine (~1.4 s), for the reason in `generate_with_engine`.
 
 A site with another model registers a second backend from outside this package; see
-`perception_pipeline.extensions`. Registration decides three things at once -- which model paths
+`foundationpose_perception_pipeline.extensions`. Registration decides three things at once -- which model paths
 the backend claims, how it produces depth, and what it adds to the command line -- so adding one
 is a single object rather than edits scattered across three entry points.
 
@@ -89,7 +89,7 @@ def register_backend(backend: DepthBackend) -> None:
 
 def registered_backends() -> dict[str, DepthBackend]:
     """Return the registry, extensions included."""
-    from perception_pipeline.extensions import load_extensions
+    from foundationpose_perception_pipeline.extensions import load_extensions
 
     load_extensions()
     return dict(_BACKENDS)
@@ -137,7 +137,7 @@ def _active_profile_hint() -> str:
     error path, and an error raised while building an error message helps nobody.
     """
     try:
-        from perception_pipeline.config import (
+        from foundationpose_perception_pipeline.config import (
             preparse_config,
             preparse_dataset,
             resolve_config_path,
@@ -256,8 +256,8 @@ def generate_with_engine(
     which takes a CUDA context merely by being imported, is never triggered until depth is
     actually generated.
     """
-    from perception_pipeline.inference.stereo import load_engine, scene_depth, write_scene_depth
-    from perception_pipeline.inference.stereo.tao import release_engines
+    from foundationpose_perception_pipeline.inference.stereo import load_engine, scene_depth, write_scene_depth
+    from foundationpose_perception_pipeline.inference.stereo.tao import release_engines
 
     try:
         result = scene_depth(
